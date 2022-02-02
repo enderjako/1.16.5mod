@@ -1,14 +1,20 @@
 package com.example.examplemod;
 
 import com.example.examplemod.block.ModBlocks;
+import com.example.examplemod.entity.ModEntityTypes;
+import com.example.examplemod.entity.custom.TestEntity;
+import com.example.examplemod.entity.render.TestEntityRender;
 import com.example.examplemod.item.Moditems;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DeferredWorkQueue;
 import net.minecraftforge.fml.InterModComms;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -37,6 +43,7 @@ public class ExampleMod
 
         Moditems.register(eventBus);
         ModBlocks.register(eventBus);
+        ModEntityTypes.register(eventBus);
 
 
         eventBus.addListener(this::setup);
@@ -56,11 +63,17 @@ public class ExampleMod
         // some preinit code
         LOGGER.info("HELLO FROM PREINIT");
         LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
+
+        DeferredWorkQueue.runLater(() -> {
+            GlobalEntityTypeAttributes.put(ModEntityTypes.TEST_ENTITY.get(), TestEntity.setCustomAttributes().build());
+        });
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
         // do something that can only be done on the client
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().options);
+
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TEST_ENTITY.get(), TestEntityRender::new);
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)
